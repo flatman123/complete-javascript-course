@@ -20,9 +20,9 @@ var johnTips = {
 			for (i = 0; i < this.bill.length; i++){
 				if (this.bill[i] < 50){
 					this.tipCalculator(this.bill[i], this.percent[0]);
-				} else if (this.bill[i] >= 50 && this.bill < 200){
+				} else if (this.bill[i] >= 50 && this.bill[i] < 200){
 					this.tipCalculator(this.bill[i], this.percent[2]);
-				} else if (this.bill[i] > 200){
+				} else if (this.bill[i] >= 200){
 					this.tipCalculator(this.bill[i], this.percent[3]);
 				} else {
 					this.tipCalculator(this.bill[i], .01);
@@ -53,7 +53,7 @@ var marksTips = {
 			for (i = 0; i < this.bill.length; i++){
 				if (this.bill[i] < 50){
 					this.tipCalculator(this.bill[i], this.percent[0]);
-				} else if (this.bill[i] >= 50 && this.bill < 200){
+				} else if (this.bill[i] >= 50 && this.bill[i] < 200){
 					this.tipCalculator(this.bill[i], this.percent[2]);
 				} else if (this.bill[i] > 200){
 					this.tipCalculator(this.bill[i], this.percent[3]);
