@@ -9,22 +9,92 @@ GAME RULES:
 
 */
 
-var scores, roundScore, activePlayer, dice;
 
-scores = [0,0];
-roundScore = 0;
-activePlayer = 0;
-
-dice = Math.floor(Math.random() * 6) + 1;
-// console.log(dice);
+var scores, roundScore, activePlayer;
+ 
+ scores = [0,0];
+ roundScore = 0;
+ activePlayer = 0;
 
 
-//The "Document" object has the 'querySelector' to choose elements in our 
-		// html/css coding.
-//The 'textContent' method for the querySelector is use to change the
-		//text
+// we need to set the scores to a default of  '0'..but we don't want to keep
+	// using querySelector all the time..too much to type
+//so we use the getElementById method
 
-// document.querySelector("#current-" + activePlayer).textContent = dice;
+//Here you don't need to use the pound sign becaue use ur already getting it by ID
+document.getElementById("score-0").textContent = "0";
+document.getElementById("current-0").textContent = "0";
+document.getElementById("score-1").textContent = "0";
+document.getElementById("current-1").textContent = "0";
 
-// This one allows for us to put html into the selector.
-document.querySelectory("#current-" + activePlayer).innerHTML = "<em>" + dice + "</em>";
+// Hide the Dice
+document.querySelector(".dice").style.display = "none";
+
+
+
+// Setup an EventHandler for the "rollDice button"
+// Use an anonymous function for when we clock on the button
+document.querySelector(".btn-roll").addEventListener("click", function(){
+	
+	// here is what we need to happen when the Roll dice button is pressed
+	
+	// 1. Generate a random number
+	var dice = Math.floor(Math.random() * 6) + 1;
+
+	// 2. Change the number for the current player
+	var diceDOM = document.querySelector(".dice");
+	diceDOM.src = "dice-" + dice + ".png";
+	diceDOM.style.display = "block";
+	document.querySelector("#current-" + activePlayer).textContent = dice;
+	document.querySelector("#current-" + activePlayer).innerHTML = "<b><em>" + dice + "</em></b>";
+	
+
+	// 3. update the roundScore only if the number is not a 1.
+	// use the == because === does not do TypeConversion
+	if (dice !== 1){
+		//add to the score
+		roundScore += dice;
+		document.querySelector("#current-" + activePlayer).textContent = roundScore;
+	}else{
+		//The next player Goes
+
+		activePlayer === 0 ? activePlayer = 1 : activePlayer = 0;
+		roundScore = 0;
+			
+			//reset Values to Scores to Zero
+		document.getElementById("current-0").textContent = "0";
+		document.getElementById("current-1").textContent = "0";
+
+		
+		// Show the active player
+				//removes "active" class from player-0
+		/*document.querySelector(".player-0-panel").classList.remove("active");*/
+				//and adds it to player-1
+		/*document.querySelector(".player-1-panel").classList.add("active");*/
+
+		//The problem with the above is that the active won't switch back to the other player
+			//So a batter way is to "TOGGLE"
+		document.querySelector(".player-0-panel").classList.toggle("active");
+		document.querySelector(".player-1-panel").classList.toggle("active");
+		diceDOM.style.display = "none";
+
+	}	
+
+});
+
+
+
+
+
+// Dom manipulation
+// the "querySelector method can be used to change the HTML or CSS"
+
+// Chanding the "current" to random numbers
+
+/* document.querySelector("#current-" + activePlayer).textContent = dice; */
+
+// change the italic for the dice
+// innerHTML changes the value of a webpage.
+
+/*document.querySelector("#current-" + activePlayer).innerHTML = "<b><em>" + dice + "</em></b>";*/
+
