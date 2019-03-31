@@ -57,7 +57,37 @@ document.querySelector(".btn-roll").addEventListener("click", function(){
 		document.querySelector("#current-" + activePlayer).textContent = roundScore;
 	}else{
 		//The next player Goes
+		nextPlayer();
+	}	
 
+});
+
+// Create an EventListener for the Hold Button
+document.querySelector(".btn-hold").addEventListener("click", function(){
+		// Add the current score to the players global Score
+		scores[activePlayer] += roundScore;
+		document.getElementById("score-" + activePlayer).textContent = scores[activePlayer];
+		
+		
+		//Check if the player Won the game
+		if (scores[activePlayer] > 10){
+			document.querySelector("#name-" + activePlayer).textContent = "WINNER!";
+			document.querySelector(".player-" + activePlayer + "-panel").classList.remove("active");
+			document.querySelector(".player-" + activePlayer + "-panel").classList.add("winner");
+			document.querySelector(".dice").style.display = "none";
+		}else{
+			nextPlayer();
+
+		}
+		
+	});
+
+
+
+
+
+// FUNCTION FOR NEXTPLAYER
+function nextPlayer(){
 		activePlayer === 0 ? activePlayer = 1 : activePlayer = 0;
 		roundScore = 0;
 			
@@ -76,11 +106,16 @@ document.querySelector(".btn-roll").addEventListener("click", function(){
 			//So a batter way is to "TOGGLE"
 		document.querySelector(".player-0-panel").classList.toggle("active");
 		document.querySelector(".player-1-panel").classList.toggle("active");
-		diceDOM.style.display = "none";
+		document.querySelector(".dice").style.display = "none";
+	
+}
 
-	}	
 
-});
+// Create an EventListener for the NEw Game Button
+
+
+
+
 
 
 
