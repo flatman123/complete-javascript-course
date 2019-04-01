@@ -10,22 +10,18 @@ GAME RULES:
 */
 
 
-var scores, roundScore, activePlayer;
- 
- scores = [0,0];
- roundScore = 0;
- activePlayer = 0;
+var scores, roundScore, activePlayer, gamePlayingLive;
+
+// Zero's out the game before gameplay.
+init();
+
 
 
 // we need to set the scores to a default of  '0'..but we don't want to keep
 	// using querySelector all the time..too much to type
 //so we use the getElementById method
 
-//Here you don't need to use the pound sign becaue use ur already getting it by ID
-document.getElementById("score-0").textContent = "0";
-document.getElementById("current-0").textContent = "0";
-document.getElementById("score-1").textContent = "0";
-document.getElementById("current-1").textContent = "0";
+
 
 // Hide the Dice
 document.querySelector(".dice").style.display = "none";
@@ -35,7 +31,9 @@ document.querySelector(".dice").style.display = "none";
 // Setup an EventHandler for the "rollDice button"
 // Use an anonymous function for when we clock on the button
 document.querySelector(".btn-roll").addEventListener("click", function(){
-	
+
+	if (gamePlayingLive) {
+
 	// here is what we need to happen when the Roll dice button is pressed
 	
 	// 1. Generate a random number
@@ -58,15 +56,17 @@ document.querySelector(".btn-roll").addEventListener("click", function(){
 	}else{
 		//The next player Goes
 		nextPlayer();
-	}	
+	};	
 
+	};
 });
 
 // Create an EventListener for the Hold Button
 document.querySelector(".btn-hold").addEventListener("click", function(){
-		// Add the current score to the players global Score
-		scores[activePlayer] += roundScore;
-		document.getElementById("score-" + activePlayer).textContent = scores[activePlayer];
+		if (gamePlayingLive){
+			// Add the current score to the players global Score
+			scores[activePlayer] += roundScore;
+			document.getElementById("score-" + activePlayer).textContent = scores[activePlayer];
 		
 		
 		//Check if the player Won the game
@@ -75,14 +75,14 @@ document.querySelector(".btn-hold").addEventListener("click", function(){
 			document.querySelector(".player-" + activePlayer + "-panel").classList.remove("active");
 			document.querySelector(".player-" + activePlayer + "-panel").classList.add("winner");
 			document.querySelector(".dice").style.display = "none";
+			gamePlayingLive = false;
 		}else{
 			nextPlayer();
 
-		}
-		
-	});
+		};
 
-
+		};
+});
 
 
 
@@ -108,11 +108,38 @@ function nextPlayer(){
 		document.querySelector(".player-1-panel").classList.toggle("active");
 		document.querySelector(".dice").style.display = "none";
 	
-}
+};
 
 
 // Create an EventListener for the NEw Game Button
+document.querySelector(".btn-new").addEventListener("click", init);
 
+
+
+//Here you don't need to use the pound sign becaue use ur already getting it by ID
+function init(){
+	// Zero's out the game before gameplay.
+
+	scores = [0,0];
+ 	roundScore = 0;
+ 	activePlayer = 0;
+
+ 	//The game continues to play even though there is a winner. this is a problem.
+	// So we need a "STATE-VARIABLE" that monitors the state of the game.
+	gamePlayingLive = true;
+
+
+	document.getElementById("score-0").textContent = "0";
+	document.getElementById("current-0").textContent = "0";
+	document.getElementById("score-1").textContent = "0";
+	document.getElementById("current-1").textContent = "0";
+	document.getElementById("name-0").textContent = "Player-1";
+	document.getElementById("name-1").textContent = "Player-2";
+	document.querySelector(".player-0-panel").classList.remove("winner");
+	document.querySelector(".player-1-panel").classList.remove("winner");
+	document.querySelector(".player-0-panel").classList.add("active");
+	document.querySelector(".player-1-panel").classList.remove("active");
+};
 
 
 
