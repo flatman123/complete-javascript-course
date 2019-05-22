@@ -14,23 +14,25 @@ var budgetController = (function() {
 		this.val = val;
 	};
 
-	// since we need a place to store he data received from the user, we can use a bunch 
-	 // of lists..but why have multiple Data-Structures?...just use one! ( so i commented out the
-	 // below variables):
-	//                   var allExpenses = [];
-	//					 var allIncomes = [];
-
-	//so we can do this:
-				//	var data = {
-					//	allExpenses: [],
-					//	allIncomes: [],
-					//	totalExpenses: 0;
-					//	};
-			//	OR WE CAN BREAK IT DOWN EVEN FURTHER
+	var calculateTotal = function(type) {
+		var sum = 0;
+		data.allData[type].forEach(function(e,i,a) {
+			sum += e.val;
+		});
+		data.allData[type] = sum;
+		};
 
 	var data = {
-		allData: {exp: [],inc: []},
-		totals: {exp: 0, inc: 0}
+		allData: {
+			exp: [],
+			inc: []
+		},
+		totals: {
+			exp: 0,
+			inc: 0
+		},
+		bugdet: 0,
+		percentage: -1
 	};
 	return { 
 		getData: function(type, desc, val) {
@@ -48,6 +50,23 @@ var budgetController = (function() {
 		 }
 		 data.allData[type].push(newItem);
 		 return newItem;
+		},
+		calculateBudget : function(type) {
+			calculateTotal(type);			
+
+			// Calculate the budget
+			data.budget = data.totals.inc - data.totals.exp;
+
+			//Calculate the percentage
+			data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+		},
+		getBudget: function() {
+			return {
+				budget: data.budget,
+				totalInc: data.totals.inc,
+				totalExp: data.totals.exp,
+				percentage: data.percentage
+			}
 		}
 	};
 })();
@@ -68,7 +87,10 @@ var uiController = (function() {
 		inputVal: '.add__value',
 		inputAddBtn: '.add__btn',
 		incomeContainer: '.income__list',
-		expenseContainer: '.expenses__list'
+		expenseContainer: '.expenses__list',
+		displayExp: '.budget__expenses--value',
+		displayInc: '.budget__income--value'
+
 	};
 
 	return { 
@@ -77,7 +99,7 @@ var uiController = (function() {
 				//we need to return these values at the same time..put it in an object.				
 				inType: document.querySelector(domStrings.inputType).value, // will be either 'inc' or 'exp'
 				description: document.querySelector(domStrings.inputdesc).value,
-				value: document.querySelector(domStrings.inputVal).value
+				value: parseFloat(document.querySelector(domStrings.inputVal).value)
 			};
 		},
 		exportDomStrings: function() {
@@ -102,7 +124,7 @@ var uiController = (function() {
 			} else if (type === 'exp') {
 				element = domStrings.expenseContainer;
 
-			     	'<div class="item clearfix" id="expense-%eipId%"> \
+			html =	'<div class="item clearfix" id="expense-%eipId%"> \
                     <div class="item__description">%description%</div> \
                     <div class="right clearfix"><div class="item__value">%val%</div> \
                     <div class="item__percentage">21%</div><div class="item__delete"> \
@@ -118,6 +140,20 @@ var uiController = (function() {
 			// Insert  changes into HTML
 			document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
 			return newHtml;
+		},
+		clearFields: function() {
+			var fieldsArray, fields;
+
+			fields = document.querySelectorAll(domStrings.inputdesc + ',' + domStrings.inputVal);
+
+			fieldsArray = Array.prototype.slice.call(fields);
+
+			fieldsArray.forEach(function(e,i,a) {
+				e.val = '';
+			});
+		},
+		displayResults: function() {
+			document.querySelector(domStrings.displayInc).value = 's';
 		}
 		}
 })();
@@ -144,21 +180,38 @@ var  appController = (function(budgCtrl, uiCtrl) {
 	};
 		
 	var crtlAddItem = function() {
-		var t,d,v, newItem;
+		var t,d,v, newItem, budget;
 		//1. Get the filed input data.
 		t = uiController.getInput().inType;
 		d = uiController.getInput().description;
 		v = uiController.getInput().value;
+		
+
+		if (d !== '' && !isNaN(v)) {
+
+			//2. Add New item to budget controler
+			newItem = budgCtrl.getData(t,d,v);
+
+			//3. add item to user interface.
+			var output = uiCtrl.addListItem(newItem,t);
 			
-		//2. Add New item to budget controler
-		newItem = budgCtrl.getData(t,d,v);
+			//4. calculate the budget.
+			budgCtrl.calculateBudget(t);
 
-		//3. add item to user interface.
-		var output = uiCtrl.addListItem(newItem,t);
-		console.log(output);
+			//5. Return the budget.
+			budget = budgCtrl.getBudget();
 
-		//4. calculate the budget.
-		//5. display the budget.
+		} else if (d !== '' && isNaN(v)) {
+			alert('Please Enter a Value amount!');
+		} else if (d === '' && !isNaN(v)) {
+			alert('Please Enter a Description!');
+		} else {
+			alert('Please Enter a Description and a Value Amount!');
+		}
+
+		//6. Display the budget
+
+
 		
 	};
 	return {
