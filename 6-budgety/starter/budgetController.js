@@ -19,7 +19,7 @@ var budgetController = (function() {
 		data.allData[type].forEach(function(e,i,a) {
 			sum += e.val;
 		});
-		data.allData[type] = sum;
+		data.allData[type].push(sum);
 		};
 
 	var data = {
@@ -210,8 +210,6 @@ var  appController = (function(budgCtrl, uiCtrl) {
 		}
 
 		//6. Display the budget
-
-
 		
 	};
 	return {
