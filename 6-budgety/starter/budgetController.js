@@ -14,15 +14,6 @@ var budgetController = (function() {
 		this.val = val;
 	};
 
-	var calculateTotal = function(type) {
-		var sum = 0;
-		data.allData[type].forEach(function(e) {
-			sum += e.val;
-		});
-		data.allData[type].push(sum);
-		console.log(data.allData[type]);
-		};
-
 	var data = {
 		allData: {
 			exp: [],
@@ -35,11 +26,24 @@ var budgetController = (function() {
 		bugdet: 0,
 		percentage: -1
 	};
+
+	var calculateTotal = function(type) {
+		var sum, tots;
+		sum = 0;
+
+		data.allData[type].forEach(function(e) {
+			sum += e.val;
+			data.totals[type] = sum;
+			return tots;
+		});
+		};
+
 	return { 
 		getData: function(type, desc, val) {
 		var newItem, ID;
 		
 		if (data.allData[type].length > 0) {
+
 			ID = data.allData[type][data.allData[type].length -1].id + 1;
 		} else {
 			ID = 0;
@@ -50,15 +54,7 @@ var budgetController = (function() {
 		 	newItem = new Expense(ID, desc, val);
 		 }
 		 data.allData[type].push(newItem);
-		 
 		 return newItem;
-
-		 //
-		 //
-		 //FIX ISSUE WITH edID..NOT WORKING CORRECTLY.
-		 //
-		 //
-
 		},
 		calculateBudget : function() {
 			calculateTotal('exp');
@@ -67,8 +63,14 @@ var budgetController = (function() {
 			// Calculate the budget
 			data.budget = data.totals.inc - data.totals.exp;
 
-			//Calculate the percentage
-			data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+			//Calculate the percentage of income that we spent
+			if (data.totals.inc > 0) {
+				//Calculate the percentage
+				data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+			} else {
+				data.percentage = -1;
+			}
+
 		},
 		getBudget: function() {
 			return {
@@ -83,12 +85,6 @@ var budgetController = (function() {
 		}
 	};
 })();
-
-
-var dataController = (function() {
-
-})();
-
 
 
 var uiController = (function() {
@@ -164,6 +160,10 @@ var uiController = (function() {
 				e.value = '';
 			});
 		},
+		displayBudget: function(obj) {
+			//code
+			document.querySelector(domStrings.displayInc).value = data.totals.inc;
+		}
 		}
 })();
 
@@ -197,6 +197,7 @@ var  appController = (function(budgCtrl, uiCtrl) {
 		budget = budgCtrl.getBudget();
 
 		//3. Display the budget on the ui
+		//console.log(budget);
 		console.log(budget);
 	};
 
@@ -211,7 +212,8 @@ var  appController = (function(budgCtrl, uiCtrl) {
 
 			//2. Add New item to budget controler
 			newItem = budgCtrl.getData(t,d,v);
-			console.log(newItem);
+			console.log(newItem)
+						
 
 			//3. add item to user interface.
 			var output = uiCtrl.addListItem(newItem,t);
@@ -221,6 +223,9 @@ var  appController = (function(budgCtrl, uiCtrl) {
 			
 			//5. Return the budget.
 			updateBudget();
+
+			//6. Display Budget
+			
 
 		} else if (d !== '' && isNaN(v)) {
 			alert('Please Enter a Value amount!');
