@@ -103,7 +103,6 @@ var uiController = (function() {
 		expenseContainer: '.expenses__list',
 		displayExp: '.budget__expenses--value',
 		displayInc: '.budget__income--value'
-
 	};
 
 	return { 
@@ -165,9 +164,6 @@ var uiController = (function() {
 				e.value = '';
 			});
 		},
-		displayResults: function() {
-			document.querySelector(domStrings.displayInc).value = 's';
-		}
 		}
 })();
 
