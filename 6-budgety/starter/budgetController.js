@@ -98,7 +98,9 @@ var uiController = (function() {
 		incomeContainer: '.income__list',
 		expenseContainer: '.expenses__list',
 		displayExp: '.budget__expenses--value',
-		displayInc: '.budget__income--value'
+		displayInc: '.budget__income--value',
+		container: '.container clearfix'
+
 	};
 
 	return { 
@@ -149,6 +151,10 @@ var uiController = (function() {
 			document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
 			return newHtml;
 		},
+		deleteItem: function(obj,type) {
+			var dInc;
+
+		},
 		clearFields: function() {
 			var fieldsArray, fields;
 
@@ -160,10 +166,7 @@ var uiController = (function() {
 				e.value = '';
 			});
 		},
-		displayBudget: function(obj) {
-			//code
-			document.querySelector(domStrings.displayInc).value = data.totals.inc;
-		}
+
 		}
 })();
 
@@ -181,11 +184,18 @@ var  appController = (function(budgCtrl, uiCtrl) {
 
 		document.querySelector(getDoms).addEventListener('click', crtlAddItem);  
 		
+		//Add Item
 		document.addEventListener('keypress', function(e) {  
 			if (e.keyCode === 13 || e.which === 13) { 
 				crtlAddItem();
 			}
 		});
+
+		//Delete Item
+		document.querySelector(getDoms.container).addEventListener('click', function(e){
+			const dInc
+		});
+
 	};
 
 	var updateBudget = function() {
@@ -236,6 +246,9 @@ var  appController = (function(budgCtrl, uiCtrl) {
 		}
 
 		//6. Display the budget
+
+		//delete Item
+		
 		
 	};
 	return {
