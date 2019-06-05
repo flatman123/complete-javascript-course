@@ -98,7 +98,8 @@ var uiController = (function() {
 		incomeContainer: '.income__list',
 		expenseContainer: '.expenses__list',
 		displayExp: '.budget__expenses--value',
-		displayInc: '.budget__income--value'
+		displayInc: '.budget__income--value',
+		container: '.container'
 	};
 
 	return { 
@@ -112,7 +113,8 @@ var uiController = (function() {
 		},
 		exportDomStrings: function() {
 			return {
-				doms: domStrings.inputAddBtn
+				doms: domStrings.inputAddBtn,
+				delBtn: domStrings.container
 			};
 		},
 		addListItem: function(obj, type) {
@@ -169,7 +171,7 @@ var uiController = (function() {
 
 // Global app Controller
 var  appController = (function(budgCtrl, uiCtrl) {
-	var getDoms = uiController.exportDomStrings().doms;
+	var getDoms = uiController.exportDomStrings();
 	
 	var getEventListeners = function() {
 
@@ -179,13 +181,16 @@ var  appController = (function(budgCtrl, uiCtrl) {
 		// on any part of the code. //'e' means 'event'
 		// the 'which'method is for older browsers that dont have 'keyCode'propery.
 
-		document.querySelector(getDoms).addEventListener('click', crtlAddItem);  
-		
+		document.querySelector(getDoms.doms).addEventListener('click', crtlAddItem);  
+
 		document.addEventListener('keypress', function(e) {  
 			if (e.keyCode === 13 || e.which === 13) { 
 				crtlAddItem();
+				
 			}
 		});
+
+		document.querySelector(getDoms.delBtn).addEventListener('click',deleteItem);
 	};
 
 	var updateBudget = function() {
@@ -237,6 +242,18 @@ var  appController = (function(budgCtrl, uiCtrl) {
 
 		//6. Display the budget
 		
+	};
+
+	var deleteItem = function(event) {
+		var itemID;
+		// Code for deleting a button
+		itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
+
+		if (itemID) {
+
+			
+
+		}
 	};
 	return {
 		init: function() {
