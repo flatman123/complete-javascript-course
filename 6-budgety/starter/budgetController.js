@@ -56,6 +56,19 @@ var budgetController = (function() {
 		 data.allData[type].push(newItem);
 		 return newItem;
 		},
+
+		deleteItem: function(type, id) {
+			var ids, index;
+			ids = data.allData[type].map(function(args) {
+				return args.id;
+			});
+			index = ids.indexOf(id);
+
+			if (index !== -1) {
+				data.allData[type].splice(index, 1);
+			}
+		},
+
 		calculateBudget : function() {
 			calculateTotal('exp');
 			calculateTotal('inc');			
@@ -72,6 +85,7 @@ var budgetController = (function() {
 			}
 
 		},
+
 		getBudget: function() {
 			return {
 				budget: data.budget,
@@ -99,7 +113,7 @@ var uiController = (function() {
 		expenseContainer: '.expenses__list',
 		displayExp: '.budget__expenses--value',
 		displayInc: '.budget__income--value',
-		container: '.container'
+		container: '.container',
 	};
 
 	return { 
@@ -125,7 +139,7 @@ var uiController = (function() {
 			if (type === 'inc') {
 				element = domStrings.incomeContainer;
 
-			html = '<div class="item clearfix" id="income-%id%"> \
+			html = '<div class="item clearfix" id="inc-%id%"> \
 			     	<div class="item__description">%description%</div> \
 			     	<div class="right clearfix"><div class="item__value">+ %val%</div>\
 			     	<div class="item__delete"><button class="item__delete--btn"> \
@@ -134,7 +148,7 @@ var uiController = (function() {
 			} else if (type === 'exp') {
 				element = domStrings.expenseContainer;
 
-			html =	'<div class="item clearfix" id="expense-%id%"> \
+			html =	'<div class="item clearfix" id="exp-%id%"> \
                     <div class="item__description">%description%</div> \
                     <div class="right clearfix"><div class="item__value">- %val%</div> \
                     <div class="item__percentage">21%</div><div class="item__delete"> \
@@ -151,6 +165,18 @@ var uiController = (function() {
 			document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
 			return newHtml;
 		},
+
+		deleteListItem: function(classSelectorItem) {
+			// We can't remove an element in js, only the child. however
+				//we have to know the parent to remove the child.
+
+			//here we will remove the child.
+			let parent = document.getElementById(classSelectorItem).parentNode;
+			let child = document.getElementById(classSelectorItem);
+			let rmvChild = parent.removeChild(child);
+
+		},
+
 		clearFields: function() {
 			var fieldsArray, fields;
 
@@ -161,11 +187,9 @@ var uiController = (function() {
 			fieldsArray.forEach(function(e,i,a) {
 				e.value = '';
 			});
+			document.querySelector(domStrings.inputdesc).focus();
 		},
-		displayBudget: function(obj) {
-			//code
-			document.querySelector(domStrings.displayInc).value = data.totals.inc;
-		}
+
 		}
 })();
 
@@ -182,15 +206,17 @@ var  appController = (function(budgCtrl, uiCtrl) {
 		// the 'which'method is for older browsers that dont have 'keyCode'propery.
 
 		document.querySelector(getDoms.doms).addEventListener('click', crtlAddItem);  
+		//Add Item
+
+		document.querySelector(getDoms.delBtn).addEventListener('click', crtldeleteItem);
 
 		document.addEventListener('keypress', function(e) {  
 			if (e.keyCode === 13 || e.which === 13) { 
 				crtlAddItem();
-				
 			}
 		});
 
-		document.querySelector(getDoms.delBtn).addEventListener('click',deleteItem);
+
 	};
 
 	var updateBudget = function() {
@@ -203,8 +229,7 @@ var  appController = (function(budgCtrl, uiCtrl) {
 
 		//3. Display the budget on the ui
 		//console.log(budget);
-		console.log(budget);
-	};
+			};
 
 	var crtlAddItem = function() {
 		var t,d,v, newItem, budget;
@@ -217,15 +242,13 @@ var  appController = (function(budgCtrl, uiCtrl) {
 
 			//2. Add New item to budget controler
 			newItem = budgCtrl.getData(t,d,v);
-			console.log(newItem)
-						
-
+			
 			//3. add item to user interface.
 			var output = uiCtrl.addListItem(newItem,t);
 			
 			//4. Clear Fields
 			uiCtrl.clearFields();
-			
+					
 			//5. Return the budget.
 			updateBudget();
 
@@ -241,17 +264,30 @@ var  appController = (function(budgCtrl, uiCtrl) {
 		}
 
 		//6. Display the budget
-		
+
+		//delete Item
 	};
 
-	var deleteItem = function(event) {
-		var itemID;
+	var crtldeleteItem = function(event) {
+		var itemID, ID, type, splitID;
 		// Code for deleting a button
 		itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
-
+		
 		if (itemID) {
 
+			splitID = itemID.split('-');
+			type = splitID[0];
+			ID = parseInt(splitID[1]);
+
+			//1. delete item from data structure
 			
+			budgCtrl.deleteItem(type, ID);
+
+
+			//2. Delete the item from the UI
+			uiCtrl.deleteListItem(itemID);
+
+			//3. Update and show the new budget.
 
 		}
 	};
