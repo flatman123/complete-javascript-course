@@ -1,4 +1,5 @@
 var budgetController = (function() {
+	'use strict';
 	//we need a place to store our data. so we're going to use Function Contructors( Classes )
 	//Since it's a 'CLASS', it keeps track of all the incomes and expenses created.
 
@@ -6,7 +7,20 @@ var budgetController = (function() {
 		this.id = id;
 		this.description = description;
 		this.val = val;
+		this.percentage = -1;
 	};
+
+	Expense.prototype.calcPercent = function(totalIncome) {
+		if (totalIncome > 0) {
+			this.percentage = Math.round((this.value / totalIncome)) * 100;
+		} else {
+			this.percentage = -1;
+		}		
+	};
+
+	Expense.prototype.getPercent = function() {
+		return this.percentage;
+	}
 
 	var Income = function(id, description, val) {
 		this.id = id;
@@ -86,6 +100,19 @@ var budgetController = (function() {
 
 		},
 
+		calculatePercentages: function() {
+			data.allData.exp.forEach(function(current) {
+				current.calcPercent(data.totals.inc);
+			});
+		},
+
+		getPercentages: function() {
+			var allPerc = data.allData.exp.map(function(current) {
+				return current.getPercent(data.totals.inc);
+			});
+			return allPerc;
+		},
+
 		getBudget: function() {
 			return {
 				budget: data.budget,
@@ -102,6 +129,7 @@ var budgetController = (function() {
 
 
 var uiController = (function() {
+	'use strict';
 	var domStrings;
 	
 	domStrings = {
@@ -113,7 +141,9 @@ var uiController = (function() {
 		expenseContainer: '.expenses__list',
 		displayExp: '.budget__expenses--value',
 		displayInc: '.budget__income--value',
-		container: '.container',
+		displayPercent: '.budget__expenses--percentage',
+		displayBudget: '.budget__value',
+		container: '.container'
 	};
 
 	return { 
@@ -125,12 +155,14 @@ var uiController = (function() {
 				value: parseFloat(document.querySelector(domStrings.inputVal).value)
 			};
 		},
+
 		exportDomStrings: function() {
 			return {
 				doms: domStrings.inputAddBtn,
 				delBtn: domStrings.container
 			};
 		},
+
 		addListItem: function(obj, type) {
 			var html, newHtml, element;
 
@@ -177,6 +209,13 @@ var uiController = (function() {
 
 		},
 
+		zeroOut: function() {
+			document.querySelector(domStrings.displayInc).textContent = '0';
+			document.querySelector(domStrings.displayExp).textContent = '0';
+			document.querySelector(domStrings.displayBudget).textContent = '0';
+			document.querySelector(domStrings.displayPercent).textContent = '---';
+		},
+
 		clearFields: function() {
 			var fieldsArray, fields;
 
@@ -189,16 +228,27 @@ var uiController = (function() {
 			});
 			document.querySelector(domStrings.inputdesc).focus();
 		},
+		displayToUi: function(obj) {
+			document.querySelector(domStrings.displayInc).textContent = '+ ' + obj.totalInc;
+			document.querySelector(domStrings.displayExp).textContent = '- ' + obj.totalExp;
+			document.querySelector(domStrings.displayBudget).textContent = '+ ' + obj.budget;
 
+			if (obj.percentage === 0) {
+				document.querySelector(domStrings.displayPercent).textContent = '---';
+			} else {
+				document.querySelector(domStrings.displayPercent).textContent = obj.percentage + '%';
+			}
+		},
 		}
 })();
 
 // Global app Controller
 var  appController = (function(budgCtrl, uiCtrl) {
+	'use strict';
 	var getDoms = uiController.exportDomStrings();
-	
-	var getEventListeners = function() {
 
+	var getEventListeners = function() {
+		uiCtrl.zeroOut();
 		// We also want the value to be coolected if someone hits the enter=key
 		// they shouldn't only have to hit the button, whic is call a 'KeyPress Event'
 		// we're adding the keypress to the global-scope because it should happen
@@ -215,8 +265,6 @@ var  appController = (function(budgCtrl, uiCtrl) {
 				crtlAddItem();
 			}
 		});
-
-
 	};
 
 	var updateBudget = function() {
@@ -228,8 +276,21 @@ var  appController = (function(budgCtrl, uiCtrl) {
 		budget = budgCtrl.getBudget();
 
 		//3. Display the budget on the ui
-		//console.log(budget);
-			};
+		uiCtrl.displayToUi(budget);
+		};
+
+	var updatePercentage = function() {
+
+		//1. calculate  percentages
+		budgCtrl.calculatePercentages();
+
+		//2. read percentages from budget controller.
+		var percentages = budgCtrl.getPercentages();
+
+		//3 update the ui with the new percentages.
+		console.log(percentages);
+
+	};
 
 	var crtlAddItem = function() {
 		var t,d,v, newItem, budget;
@@ -252,8 +313,7 @@ var  appController = (function(budgCtrl, uiCtrl) {
 			//5. Return the budget.
 			updateBudget();
 
-			//6. Display Budget
-			
+			//6. update Display
 
 		} else if (d !== '' && isNaN(v)) {
 			alert('Please Enter a Value amount!');
@@ -262,10 +322,7 @@ var  appController = (function(budgCtrl, uiCtrl) {
 		} else {
 			alert('Please Enter a Description and a Value Amount!');
 		}
-
-		//6. Display the budget
-
-		//delete Item
+		updatePercentage();
 	};
 
 	var crtldeleteItem = function(event) {
@@ -283,17 +340,21 @@ var  appController = (function(budgCtrl, uiCtrl) {
 			
 			budgCtrl.deleteItem(type, ID);
 
-
 			//2. Delete the item from the UI
 			uiCtrl.deleteListItem(itemID);
 
 			//3. Update and show the new budget.
+			updateBudget();
 
+			//4. Calculate and update percentages.
 		}
 	};
+
+
 	return {
 		init: function() {
 			getEventListeners();
+
 		}
 	};
 })(budgetController, uiController);
